@@ -306,6 +306,120 @@
     [self.healthStore executeQuery:query];
 }
 
+- (void)fetchUpdatedAnchoredWorkouts:(HKSampleType *)type
+                    predicate:(NSPredicate *)predicate
+                       anchor:(HKQueryAnchor *)anchor
+                        limit:(NSUInteger)lim
+                   completion:(void (^)(NSDictionary *, NSError *))completion {
+
+    // declare the block
+    void (^handlerBlock)(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleObjects, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error);
+    
+    void (^handlerUpdateBlock)(HKAnchoredObjectQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable addedObjects, NSArray<HKDeletedObject *> * _Nullable deletedObjects, HKQueryAnchor * _Nullable newAnchor, NSError * _Nullable error);
+
+    // create and assign the block
+    handlerBlock = ^(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleObjects, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error) {
+
+        if (!sampleObjects) {
+            if (completion) {
+                completion(nil, error);
+            }
+            return;
+        }
+
+        if (completion) {
+            NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                for (HKWorkout *sample in sampleObjects) {
+                    @try {
+                        double energy =  [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]];
+                        double distance = [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]];
+                        NSString *type = [RCTAppleHealthKit stringForHKWorkoutActivityType:[sample workoutActivityType]];
+
+                        NSString *startDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate];
+                        NSString *endDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.endDate];
+
+                        bool isTracked = true;
+                        if ([[sample metadata][HKMetadataKeyWasUserEntered] intValue] == 1) {
+                            isTracked = false;
+                        }
+
+                        NSString* device = @"";
+                        if (@available(iOS 11.0, *)) {
+                            device = [[sample sourceRevision] productType];
+                        } else {
+                            device = [[sample device] name];
+                            if (!device) {
+                                device = @"iPhone";
+                            }
+                        }
+
+                        NSDictionary *elem = @{
+                                               @"activityId" : [NSNumber numberWithInt:[sample workoutActivityType]],
+                                               @"id" : [[sample UUID] UUIDString],
+                                               @"activityName" : type,
+                                               @"calories" : @(energy),
+                                               @"tracked" : @(isTracked),
+                                               @"metadata" : [sample metadata],
+                                               @"sourceName" : [[[sample sourceRevision] source] name],
+                                               @"sourceId" : [[[sample sourceRevision] source] bundleIdentifier],
+                                               @"device": device,
+                                               @"distance" : @(distance),
+                                               @"start" : startDateString,
+                                               @"end" : endDateString
+                                               };
+
+                        [data addObject:elem];
+                    } @catch (NSException *exception) {
+                        NSLog(@"RNHealth: An error occured while trying to add workout sample from: %@ ", [[[sample sourceRevision] source] bundleIdentifier]);
+                    }
+                }
+                
+                NSData *anchorData = [NSKeyedArchiver archivedDataWithRootObject:newAnchor];
+                NSString *anchorString = [anchorData base64EncodedStringWithOptions:0];
+                completion(@{
+                            @"anchor": anchorString,
+                            @"data": data,
+                        }, error);
+            });
+        }
+    };
+    
+    handlerUpdateBlock = ^(HKAnchoredObjectQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable addedObjects, NSArray<HKDeletedObject *> * _Nullable deletedObjects, HKQueryAnchor * _Nullable newAnchor, NSError * _Nullable error) {
+        if (!addedObjects) {
+            if (completion) {
+                completion(nil, error);
+            }
+            return;
+        }
+        
+        if (completion) {
+        }
+
+    };
+
+    HKAnchoredObjectQuery *query = [[HKAnchoredObjectQuery alloc] initWithType:type
+                                                                     predicate:predicate
+                                                                        anchor:anchor
+                                                                         limit:lim
+                                                                resultsHandler:handlerBlock];
+    [query setUpdateHandler:handlerUpdateBlock];
+
+    [self.healthStore executeQuery:query];
+}
+
+- (void)fetchWorkoutRouteLocations:(HKWorkoutRoute *)route
+                   completion:(void (^)(NSDictionary *, NSError *))completion {
+    
+    
+    HKWorkoutRouteQuery *query = [[HKWorkoutRouteQuery alloc] initWithRoute:route dataHandler:^(HKWorkoutRouteQuery * _Nonnull query, NSArray<CLLocation *> * _Nullable routeData, BOOL done, NSError * _Nullable error) {
+        
+    }];
+
+    [self.healthStore executeQuery:query];
+}
+
 - (void)fetchAnchoredWorkouts:(HKSampleType *)type
                     predicate:(NSPredicate *)predicate
                        anchor:(HKQueryAnchor *)anchor
@@ -383,7 +497,7 @@
             });
         }
     };
-
+    
     HKAnchoredObjectQuery *query = [[HKAnchoredObjectQuery alloc] initWithType:type
                                                                      predicate:predicate
                                                                         anchor:anchor
@@ -999,5 +1113,323 @@
     [self.healthStore executeQuery:query];
     
 }
+
+/*@yulianto.kevin: adding anchored workouts routes*/
+- (void)fetchAnchoredMultipleWorkoutRoutes:(HKSampleType *)type
+                    predicate:(NSPredicate *)predicate
+                       anchor:(HKQueryAnchor *)anchor
+                        limit:(NSUInteger)lim
+                   completion:(void (^)(NSDictionary *, NSError *))completion {
+
+    // declare the block
+    void (^handlerBlock)(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleObjects, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error);
+
+    // create and assign the block
+    handlerBlock = ^(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleObjects, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error) {
+        // async thread (another thread)
+
+        if (!sampleObjects) {
+            if (completion) {
+                completion(nil, error);
+            }
+            return;
+        }
+    
+        // if not completion return
+        if (!completion) return;
+
+        NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+
+//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{  // try to dispatch to another thread
+        dispatch_async(dispatch_get_main_queue(), ^{
+            for (HKWorkout *sample in sampleObjects) {
+                @try {
+                    /* Code **/
+                    NSPredicate* runningObjectQuery = [HKQuery predicateForObjectsFromWorkout:sample];
+                    
+                    void (^resultHandlerBlock)(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleWorkoutRoutes, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error);
+                    
+                    resultHandlerBlock = ^(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleWorkoutRoutes, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error) {
+                        if (error) {
+                            if (completion) {
+                                completion(nil, error);
+                            }
+                            return;
+                        }
+                        
+                        double energy =  [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]];
+                        double distance = [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]];
+                        NSString *type = [RCTAppleHealthKit stringForHKWorkoutActivityType:[sample workoutActivityType]];
+
+                        NSString *startDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate];
+                        NSString *endDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.endDate];
+
+                        bool isTracked = true;
+                        if ([[sample metadata][HKMetadataKeyWasUserEntered] intValue] == 1) {
+                            isTracked = false;
+                        }
+
+                        NSString* device = @"";
+                        if (@available(iOS 11.0, *)) {
+                            device = [[sample sourceRevision] productType];
+                        } else {
+                            device = [[sample device] name];
+                            if (!device) {
+                                device = @"iPhone";
+                            }
+                        }
+
+                        // Make sure you have some route samples
+                        if (sampleWorkoutRoutes != nil && [sampleWorkoutRoutes count] > 0) {
+                            //skip workoute route and add empty workoutRoutes
+                            NSDictionary *elem = @{
+                               @"activityId" : [NSNumber numberWithInt:[sample workoutActivityType]],
+                               @"id" : [[sample UUID] UUIDString],
+                               @"activityName" : type,
+                               @"calories" : @(energy),
+                               @"tracked" : @(isTracked),
+                               @"metadata" : [sample metadata],
+                               @"sourceName" : [[[sample sourceRevision] source] name],
+                               @"sourceId" : [[[sample sourceRevision] source] bundleIdentifier],
+                               @"device": device,
+                               @"distance" : @(distance),
+                               @"start" : startDateString,
+                               @"end" : endDateString,
+                               @"workouteRoutes": [[NSMutableArray alloc] init],
+                            };
+                            [data addObject:elem];
+                            return;
+                        }
+                        
+                        NSDictionary *elem = @{
+                           @"activityId" : [NSNumber numberWithInt:[sample workoutActivityType]],
+                           @"id" : [[sample UUID] UUIDString],
+                           @"activityName" : type,
+                           @"calories" : @(energy),
+                           @"tracked" : @(isTracked),
+                           @"metadata" : [sample metadata],
+                           @"sourceName" : [[[sample sourceRevision] source] name],
+                           @"sourceId" : [[[sample sourceRevision] source] bundleIdentifier],
+                           @"device": device,
+                           @"distance" : @(distance),
+                           @"start" : startDateString,
+                           @"end" : endDateString,
+                           @"workouteRoutes": sampleObjects,
+                        };
+                        
+                        [data addObject:elem];
+                    };
+                    
+                    HKAnchoredObjectQuery *routeQuery = [[HKAnchoredObjectQuery alloc] initWithType:[HKSeriesType workoutRouteType] predicate:runningObjectQuery anchor:nil limit:HKObjectQueryNoLimit resultsHandler:resultHandlerBlock];
+                    
+                    [routeQuery setUpdateHandler:^(HKAnchoredObjectQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable addedObjects, NSArray<HKDeletedObject *> * _Nullable deletedObjects, HKQueryAnchor * _Nullable newAnchor, NSError * _Nullable error) {
+                        if (error) return;
+                        
+                    }];
+                    
+                    [self.healthStore executeQuery:routeQuery];
+                    /* End Code **/
+                    
+        
+                } @catch (NSException *exception) {
+                    NSLog(@"RNHealth: An error occured while trying to add workout sample from: %@ ", [[[sample sourceRevision] source] bundleIdentifier]);
+                }
+            }
+            
+            // after finish, set the data
+            NSData *anchorData = [NSKeyedArchiver archivedDataWithRootObject:newAnchor];
+            NSString *anchorString = [anchorData base64EncodedStringWithOptions:0];
+            completion(@{
+                        @"anchor": anchorString,
+                        @"data": data,
+                    }, error);
+        });
+    };
+
+    HKAnchoredObjectQuery *query = [[HKAnchoredObjectQuery alloc] initWithType:type
+                                                                     predicate:predicate
+                                                                        anchor:anchor
+                                                                         limit:lim
+                                                                resultsHandler:handlerBlock];
+
+    [self.healthStore executeQuery:query];
+}
+
+- (void)fetchAnchoredWorkoutRoutes:(HKWorkout *)sample
+                       completion:(void (^)(NSDictionary *, NSError *))completion {
+    if (!completion) return;
+
+    NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+
+//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{  // try to dispatch to another thread
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @try {
+            /* Code **/
+            NSPredicate* runningObjectQuery = [HKQuery predicateForObjectsFromWorkout:sample];
+            
+            void (^resultHandlerBlock)(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleWorkoutRoutes, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error);
+            
+            resultHandlerBlock = ^(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleWorkoutRoutes, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error) {
+                if (error) {
+                    if (completion) {
+                        completion(nil, error);
+                    }
+                    return;
+                }
+                
+                double energy =  [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]];
+                double distance = [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]];
+                NSString *type = [RCTAppleHealthKit stringForHKWorkoutActivityType:[sample workoutActivityType]];
+
+                NSString *startDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate];
+                NSString *endDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.endDate];
+
+                bool isTracked = true;
+                if ([[sample metadata][HKMetadataKeyWasUserEntered] intValue] == 1) {
+                    isTracked = false;
+                }
+
+                NSString* device = @"";
+                if (@available(iOS 11.0, *)) {
+                    device = [[sample sourceRevision] productType];
+                } else {
+                    device = [[sample device] name];
+                    if (!device) {
+                        device = @"iPhone";
+                    }
+                }
+
+                // Make sure you have some route samples
+                if (sampleWorkoutRoutes != nil && [sampleWorkoutRoutes count] > 0) {
+                    //skip workoute route and add empty workoutRoutes
+                    NSDictionary *elem = @{
+                       @"activityId" : [NSNumber numberWithInt:[sample workoutActivityType]],
+                       @"id" : [[sample UUID] UUIDString],
+                       @"activityName" : type,
+                       @"calories" : @(energy),
+                       @"tracked" : @(isTracked),
+                       @"metadata" : [sample metadata],
+                       @"sourceName" : [[[sample sourceRevision] source] name],
+                       @"sourceId" : [[[sample sourceRevision] source] bundleIdentifier],
+                       @"device": device,
+                       @"distance" : @(distance),
+                       @"start" : startDateString,
+                       @"end" : endDateString,
+                       @"workouteRoutes": [[NSMutableArray alloc] init],
+                    };
+                    return;
+                }
+                
+                NSDictionary *elem = @{
+                   @"activityId" : [NSNumber numberWithInt:[sample workoutActivityType]],
+                   @"id" : [[sample UUID] UUIDString],
+                   @"activityName" : type,
+                   @"calories" : @(energy),
+                   @"tracked" : @(isTracked),
+                   @"metadata" : [sample metadata],
+                   @"sourceName" : [[[sample sourceRevision] source] name],
+                   @"sourceId" : [[[sample sourceRevision] source] bundleIdentifier],
+                   @"device": device,
+                   @"distance" : @(distance),
+                   @"start" : startDateString,
+                   @"end" : endDateString,
+                   @"workouteRoutes": sampleWorkoutRoutes,
+                };
+            };
+            
+            HKAnchoredObjectQuery *routeQuery = [[HKAnchoredObjectQuery alloc] initWithType:[HKSeriesType workoutRouteType] predicate:runningObjectQuery anchor:nil limit:HKObjectQueryNoLimit resultsHandler:resultHandlerBlock];
+            
+            [routeQuery setUpdateHandler:^(HKAnchoredObjectQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable addedObjects, NSArray<HKDeletedObject *> * _Nullable deletedObjects, HKQueryAnchor * _Nullable newAnchor, NSError * _Nullable error) {
+                if (error) return;
+            }];
+            
+            [self.healthStore executeQuery:routeQuery];
+            /* End Code **/
+
+        } @catch (NSException *exception) {
+            NSLog(@"RNHealth: An error occured while trying to add workout sample from: %@ ", [[[sample sourceRevision] source] bundleIdentifier]);
+        }
+    });
+};
+
+
+- (void)fetchWorkoutRouteLocations:(HKWorkoutRoute *)workoutRoute
+                        completion:(void (^)(NSDictionary *, NSError *))completion  API_AVAILABLE(ios(11.0)){
+
+    NSMutableArray *locationData = [NSMutableArray arrayWithCapacity:1];
+    
+    void (^handlerBlock)(HKWorkoutRouteQuery * _Nonnull query, NSArray<CLLocation *> * _Nullable cllocation, BOOL done, NSError * _Nullable error);
+    
+    handlerBlock = ^(HKWorkoutRouteQuery * _Nonnull query, NSArray<CLLocation *> * _Nullable cllocation, BOOL done, NSError * _Nullable error)  {
+        
+        if (error) {
+            if (completion) {
+                completion(nil, error);
+            }
+            return;
+        }
+        
+        if (!cllocation) {
+            if (completion) {
+                NSError *error = [NSError errorWithDomain:@"com.yourcompany.appname" code:3456 userInfo:@{NSLocalizedDescriptionKey:@"No locations found"}];
+                completion(nil, error);
+            }
+            return;
+        }
+        
+        if (completion == nil) return;
+        
+        [locationData addObjectsFromArray:cllocation];
+        
+//        NSMutableArray *latitudes = [NSMutableArray arrayWithCapacity:1];
+//        NSMutableArray *longitudes = [NSMutableArray arrayWithCapacity:1];
+        
+//        for (CLLocation *location in cllocation) {
+//            // location: altitude, coordinate, course, courseAccuracy, floor, horizontalAccuracy, speed, speedAcuracy
+//            [latitudes addObject:[NSNumber numberWithDouble:location.coordinate.latitude]];
+//            [longitudes addObject:[NSNumber numberWithDouble:location.coordinate.longitude]];
+//        }
+        
+        // Outline map region to display
+//        int maxLat = [[latitudes valueForKeyPath: @"@max.self"] intValue];
+//        int minLat = [[latitudes valueForKeyPath: @"@min.self"] intValue];
+//        int maxLong = [[longitudes valueForKeyPath: @"@max.self"] intValue];
+//        int minLong = [[longitudes valueForKeyPath: @"@min.self"] intValue];
+
+        
+        if (done) {
+            if (completion) {
+                completion(@{
+                    @"data": locationData,
+                }, error);
+            }
+            return;
+            // The query returned all the location data associated with the route.
+            // Do something with the complete data set.
+//            let mapDisplayAreaPadding = 1.3
+//            let mapCenter = CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2, longitude: (minLong + maxLong) / 2);
+//            let mapSpan = MKCoordinateSpan(latitudeDelta: (maxLat - minLat) * mapDisplayAreaPadding,
+//                                          longitudeDelta: (maxLong - minLong) * mapDisplayAreaPadding)
+
+//            DispatchQueue.main.async {
+                // Push to main thread to drop dots on the map.
+                // Without this a warning will occur.
+//                self.region = MKCoordinateRegion(center: mapCenter, span: mapSpan)
+//                locations.forEach { (location) in
+//                    self.overlayRoute(at: location)
+//                }
+//            }
+        }
+        
+        // stop the query by calling:
+        // store.stop(query)
+    };
+
+    
+    HKWorkoutRouteQuery *query = [[HKWorkoutRouteQuery alloc] initWithRoute:workoutRoute dataHandler:handlerBlock];
+    [self.healthStore executeQuery:query];
+}
+
+/*end @yulianto.kevin*/
 
 @end

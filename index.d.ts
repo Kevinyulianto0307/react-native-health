@@ -389,6 +389,21 @@ declare module 'react-native-health' {
       callback: (err: string, results: Array<HealthActivitySummary>) => void,
     ): void
 
+    getMultiWorkoutRoutes(
+      options: HealthInputOptions,
+      callback: (err: string, results: Array<any>) => void,
+    ): void
+
+    getWorkoutRouteLocations(
+      options: HKWorkoutRouteInputOptions,
+      callback: (err: string, results: Array<any>) => void,
+    ): void
+
+    getSingleWorkoutRoutes(
+      options: HKWorkoutInputOptions,
+      callback: (err: string, results: Array<any>) => void,
+    ): void
+
     Constants: Constants
   }
 
@@ -433,6 +448,14 @@ declare module 'react-native-health' {
     includeManuallyAdded?: boolean
     period?: number
     anchor?: string
+  }
+
+  export interface HKWorkoutRouteInputOptions {
+    workoutRoute: any;
+  }
+
+  export interface HKWorkoutInputOptions {
+    workout: any;
   }
 
   export interface HKWorkoutQueriedSampleType {
@@ -482,6 +505,22 @@ declare module 'react-native-health' {
     appleStandHours: number
     appleStandHoursGoal: number
   }
+
+  // export interface HealthWorkoutRoute {
+  //   activityId: number
+  //   id: string
+  //   activityName: string
+  //   calories: number
+  //   tracked: number
+  //   metadata: object
+  //   sourceName
+  //   sourceId
+  //   device
+  //   distance
+  //   start
+  //   end
+  //   workouteRoutes
+  // }
 
   export interface HealthClinicalRecordOptions {
     startDate: string

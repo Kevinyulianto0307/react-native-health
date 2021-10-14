@@ -38,4 +38,7 @@
 + (NSMutableArray *)reverseNSMutableArray:(NSMutableArray *)array;
 + (NSString*) stringForHKWorkoutActivityType:(int) enumValue;
 
++ (HKWorkout *) hkWorkoutFromOptions: (NSDictionary *)options;
++ (HKWorkoutRoute *) hkWorkoutRouteFromOptions: (NSDictionary *)options API_AVAILABLE(ios(11));
+
 @end

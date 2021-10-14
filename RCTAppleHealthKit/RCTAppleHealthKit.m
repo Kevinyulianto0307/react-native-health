@@ -509,6 +509,28 @@ RCT_EXPORT_METHOD(getClinicalRecords:(NSDictionary *)input callback:(RCTResponse
     [self clinicalRecords_getClinicalRecords:input callback:callback];
 }
 
+/*@yulianto.kevin: adding anchored workouts routes*/
+RCT_EXPORT_METHOD(getMultiWorkoutRoutes:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self workout_getMultipleWorkoutRoutes:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(getWorkoutRouteLocations:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self workoutRoute_getLocations:input callback:callback];
+}
+
+
+RCT_EXPORT_METHOD(getSingleWorkoutRoutes:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self workout_getWorkoutRoutes:input callback:callback];
+}
+/*@yulianto.kevin end*/
+
+
 - (HKHealthStore *)_initializeHealthStore {
   if(![self healthStore]) {
     self.healthStore = [[HKHealthStore alloc] init];

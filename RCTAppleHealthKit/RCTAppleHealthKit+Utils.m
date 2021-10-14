@@ -568,4 +568,28 @@
     }
 }
 
+/*@yulianto.kevin add workout route utils*/
++ (HKWorkout *)hkWorkoutFromOptions:(NSDictionary *)options {
+    NSString *workoutString = [options objectForKey:@"workout"];
+    if (!workoutString.length) return nil;
+    NSData* workoutData = [[NSData alloc] initWithBase64EncodedString:workoutString options:0];
+    HKWorkout *workout = [NSKeyedUnarchiver unarchiveObjectWithData:workoutData];
+    if(workout == nil){
+        return nil;
+    }
+    return workout;
+}
+
++ (HKWorkoutRoute *)hkWorkoutRouteFromOptions:(NSDictionary *)options  API_AVAILABLE(ios(11.0)){
+    NSString *workoutRouteString = [options objectForKey:@"workoutRoute"];
+    if (!workoutRouteString.length) return nil;
+    NSData* workoutRouteData = [[NSData alloc] initWithBase64EncodedString:workoutRouteString options:0];
+    HKWorkoutRoute *workoutRoute = [NSKeyedUnarchiver unarchiveObjectWithData:workoutRouteData];
+    if(workoutRoute == nil){
+        return nil;
+    }
+    return workoutRoute;
+}
+
+
 @end

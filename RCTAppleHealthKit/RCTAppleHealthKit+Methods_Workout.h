@@ -10,7 +10,18 @@
 
 @interface RCTAppleHealthKit (Methods_Workout)
 
+#import "RCTAppleHealthKit.h"
+
+@interface RCTAppleHealthKit (Methods_Workout)
+
+/*@yulianto.kevin: adding anchored workouts routes*/
+- (void)workout_getMultipleWorkoutRoutes:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback API_AVAILABLE(ios(11));
+
+- (void)workout_getWorkoutRoutes:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback API_AVAILABLE(ios(11));
+
+/*end @yulianto.kevin*/
 - (void)workout_getAnchoredQuery:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)workout_save: (NSDictionary *)input callback: (RCTResponseSenderBlock)callback;
 
 @end
+
