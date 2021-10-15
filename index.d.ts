@@ -404,6 +404,11 @@ declare module 'react-native-health' {
       callback: (err: string, results: Array<any>) => void,
     ): void
 
+    getWorkouts(
+      options: HKWorkoutInputOptions,
+      callback: (err: string, results: Array<any>) => void,
+    ): void
+
     Constants: Constants
   }
 
