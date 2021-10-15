@@ -329,7 +329,53 @@
 
             dispatch_async(dispatch_get_main_queue(), ^{
                 for (HKWorkout *sample in sampleObjects) {
-                        [data addObject:sample];
+//                    double energy =  [[sample totalEnergyBurned] doubleValueForUnit:[HKUnit kilocalorieUnit]];
+//                    double distance = [[sample totalDistance] doubleValueForUnit:[HKUnit mileUnit]];
+//                    double duration = [sample duration];
+//
+//
+//
+//                    NSString *type = [RCTAppleHealthKit stringForHKWorkoutActivityType:[sample workoutActivityType]];
+//
+//                    NSString *startDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.startDate];
+//                    NSString *endDateString = [RCTAppleHealthKit buildISO8601StringFromDate:sample.endDate];
+//
+//
+//                    bool isTracked = true;
+//                    if ([[sample metadata][HKMetadataKeyWasUserEntered] intValue] == 1) {
+//                        isTracked = false;
+//                    }
+//
+//                    NSString* device = @"";
+//                    if (@available(iOS 11.0, *)) {
+//                        device = [[sample sourceRevision] productType];
+//                    } else {
+//                        device = [[sample device] name];
+//                        if (!device) {
+//                            device = @"iPhone";
+//                        }
+//                    }
+//
+//                    NSDictionary *elem = @{
+//                       @"activityId" : [NSNumber numberWithInt:[sample workoutActivityType]],
+//                       @"id" : [[sample UUID] UUIDString],
+//                       @"activityName" : type,
+//                       @"calories" : @(energy),
+//                       @"tracked" : @(isTracked),
+//                       @"metadata" : [sample metadata],
+//                       @"sourceName" : [[[sample sourceRevision] source] name],
+//                       @"sourceId" : [[[sample sourceRevision] source] bundleIdentifier],
+//                       @"device": device,
+//                       @"distance" : @(distance),
+//                       @"start" : startDateString,
+//                       @"end" : endDateString
+//                    };
+                    
+                    NSMutableDictionary *productSample = [sample mutableCopy];
+//                    productSample[@"device"] = device;
+
+                    [data addObject:productSample];
+                    
                 }
                 
                 NSData *anchorData = [NSKeyedArchiver archivedDataWithRootObject:newAnchor];
