@@ -528,6 +528,12 @@ RCT_EXPORT_METHOD(getSingleWorkoutRoutes:(NSDictionary *)input callback:(RCTResp
     [self _initializeHealthStore];
     [self workout_getWorkoutRoutes:input callback:callback];
 }
+
+RCT_EXPORT_METHOD(getWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self _initializeHealthStore];
+    [self workout_getWorkouts:input callback:callback];
+}
 /*@yulianto.kevin end*/
 
 

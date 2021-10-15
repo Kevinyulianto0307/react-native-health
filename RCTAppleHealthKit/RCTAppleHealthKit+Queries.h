@@ -115,5 +115,12 @@
 
 - (void)fetchWorkoutRouteLocations: (HKWorkoutRoute *)route
                         completion:(void (^)(NSDictionary *, NSError *))completion;
+
+- (void)fetchWorkouts: (HKSampleType *)type
+                predicate:(NSPredicate *)predicate
+                   anchor:(HKQueryAnchor *)anchor
+                    limit:(NSUInteger)lim
+                completion:(void (^)(NSDictionary *, NSError *))completion;
+
 /*@yulianto.kevin end*/
 @end
