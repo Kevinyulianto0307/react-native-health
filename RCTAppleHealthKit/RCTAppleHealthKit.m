@@ -516,11 +516,11 @@ RCT_EXPORT_METHOD(getMultiWorkoutRoutes:(NSDictionary *)input callback:(RCTRespo
     [self workout_getMultipleWorkoutRoutes:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(getWorkoutRouteLocations:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self _initializeHealthStore];
-    [self workoutRoute_getLocations:input callback:callback];
-}
+//RCT_EXPORT_METHOD(getWorkoutRouteLocations:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+//{
+//    [self _initializeHealthStore];
+//    [self workoutRoute_getLocations:input callback:callback];
+//}
 
 
 RCT_EXPORT_METHOD(getSingleWorkoutRoutes:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
