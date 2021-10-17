@@ -741,7 +741,7 @@ RCT_EXPORT_METHOD(getWorkouts:(NSDictionary *)input callback:(RCTResponseSenderB
             @"AllergyRecord",
             @"ConditionRecord",
             @"CoverageRecord",
-            @"ImmunizationRecord",
+            @"ImmunsizationRecord",
             @"LabResultRecord",
             @"MedicationRecord",
             @"ProcedureRecord",

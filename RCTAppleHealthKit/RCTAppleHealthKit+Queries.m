@@ -12,6 +12,7 @@
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
+#import "OMHSerializer.h"
 
 @implementation RCTAppleHealthKit (Queries)
 
@@ -355,7 +356,7 @@
 //                            device = @"iPhone";
 //                        }
 //                    }
-//
+////
 //                    NSDictionary *elem = @{
 //                       @"activityId" : [NSNumber numberWithInt:[sample workoutActivityType]],
 //                       @"id" : [[sample UUID] UUIDString],
@@ -371,11 +372,14 @@
 //                       @"end" : endDateString
 //                    };
                     
-                    NSMutableDictionary *productSample = [sample mutableCopy];
-//                    productSample[@"device"] = device;
 
-                    [data addObject:productSample];
+//                    [data addObject:elem];
                     
+                    OMHSerializer *serializer = [OMHSerializer new];
+                    NSString* jsonString = [serializer jsonForSample:sample error:nil];
+                    NSLog(@"sample json: %@", jsonString);
+                
+                    [data addObject:jsonString];
                 }
                 
                 NSData *anchorData = [NSKeyedArchiver archivedDataWithRootObject:newAnchor];
@@ -1099,7 +1103,9 @@
                        anchor:(HKQueryAnchor *)anchor
                         limit:(NSUInteger)lim
                    completion:(void (^)(NSDictionary *, NSError *))completion {
-
+//    {
+//        data = [{ workout:object, workoutRoute: [] }]
+//    }
     // declare the block
     void (^handlerBlock)(HKAnchoredObjectQuery *query, NSArray<__kindof HKSample *> *sampleObjects, NSArray<HKDeletedObject *> *deletedObjects, HKQueryAnchor *newAnchor, NSError *error);
 
