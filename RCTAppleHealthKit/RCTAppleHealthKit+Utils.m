@@ -593,7 +593,7 @@
     return workoutRoute;
 }
 
-+ (NSDictionary *)serializeWorkoutRouteLocations:(HKWorkout *)workoutSample key:(NSArray<CLLocation *> *)locations {
++ (NSDictionary *)serializeWorkoutRouteLocations:(HKWorkout *)workoutSample locations:(NSArray<CLLocation *> *)locations {
     NSMutableDictionary *fullSerializedDictionary = [NSMutableDictionary new];
     if(workoutSample.totalDistance){
         NSString *unitString = [OMHSerializer parseUnitFromQuantity:workoutSample.totalDistance];

@@ -1095,7 +1095,7 @@
             return;
         }
         
-        if (!workoutRoutesSamples) {
+        if (!workoutRoutesSamples || [workoutRoutesSamples count] <= 0) {
             completion([NSArray array], nil);
             return;
         }
