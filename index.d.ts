@@ -389,26 +389,11 @@ declare module 'react-native-health' {
       callback: (err: string, results: Array<HealthActivitySummary>) => void,
     ): void
 
-    getMultiWorkoutRoutes(
+    getWorkoutLocations(
       options: HealthInputOptions,
       callback: (err: string, results: Array<any>) => void,
     ): void
-
-    getWorkoutRouteLocations(
-      options: HKWorkoutRouteInputOptions,
-      callback: (err: string, results: Array<any>) => void,
-    ): void
-
-    getSingleWorkoutRoutes(
-      options: HKWorkoutInputOptions,
-      callback: (err: string, results: Array<any>) => void,
-    ): void
-
-    getWorkouts(
-      options: HKWorkoutInputOptions,
-      callback: (err: string, results: Array<any>) => void,
-    ): void
-
+    
     Constants: Constants
   }
 
@@ -724,7 +709,7 @@ declare module 'react-native-health' {
     WalkingHeartRateAverage = 'WalkingHeartRateAverage',
     Weight = 'Weight',
     Workout = 'Workout',
-    WorkoutRoute = 'WorkoutRoute',
+    WorkoutRoute = 'WorkoutRoute'
   }
 
   export enum HealthUnit {
