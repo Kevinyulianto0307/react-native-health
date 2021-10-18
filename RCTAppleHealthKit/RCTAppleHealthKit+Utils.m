@@ -712,8 +712,8 @@
         @"device": device,
         @"locations": locationData,
         @"metadata":metadata,
-        @"sourceName" : [[[workout sourceRevision] source] name],
-        @"sourceId" : [[[workout sourceRevision] source] bundleIdentifier],
+           @"sourceName" : [[[workoutSample sourceRevision] source] name],
+        @"sourceId" : [[[workoutSample sourceRevision] source] bundleIdentifier],
     }];
     
     return fullSerializedDictionary;
