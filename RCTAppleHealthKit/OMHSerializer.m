@@ -16,8 +16,9 @@
 
 #import "OMHSerializer.h"
 #import "NSDate+RFC3339.h"
+#import "OMHError.h"
 #import <ObjectiveSugar/ObjectiveSugar.h>
-#import "RCTAppleHealthKitConstantMapper.h"
+#import "OMHHealthKitConstantsMapper.h"
 
 @interface OMHSerializer()
 @property (nonatomic, retain) HKSample* sample;
@@ -54,7 +55,7 @@
 }
 
 + (NSArray*)supportedTypeIdentifiers {
-   return [[RCTAppleHealthKitConstantMapper allSupportedTypeIdentifiersToClasses] allKeys];
+   return [[OMHHealthKitConstantsMapper allSupportedTypeIdentifiersToClasses] allKeys];
 }
 
 + (BOOL)canSerialize:(HKSample*)sample error:(NSError**)error {
@@ -84,7 +85,7 @@ Serializes HealthKit samples into Open mHealth compliant JSON data points.
    NSString* sampleTypeIdentifier = sample.sampleType.identifier;
    NSString* serializerClassName;
    if ([supportedTypeIdentifiers includes:sampleTypeIdentifier]){
-       serializerClassName = [RCTAppleHealthKitConstantMapper allSupportedTypeIdentifiersToClasses][sampleTypeIdentifier];
+       serializerClassName = [OMHHealthKitConstantsMapper allSupportedTypeIdentifiersToClasses][sampleTypeIdentifier];
    }
    else{
        if (error) {
@@ -115,13 +116,12 @@ Serializes HealthKit samples into Open mHealth compliant JSON data points.
    // instantiate a serializer
    OMHSerializer* serializer = [[serializerClass alloc] initWithSample:sample];
    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:[serializer data]
-                                   options:NSJSONWritingPrettyPrinted
+                                   options:0
                                      error:error];
    if (!jsonData) {
        return nil; // return early if JSON serialization failed
    }
-   NSString* jsonString = [[NSString alloc] initWithData:jsonData
-                                                encoding:NSUTF8StringEncoding];
+   NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
    return jsonString;
 }
 
@@ -138,34 +138,47 @@ Serializes HealthKit samples into Open mHealth compliant JSON data points.
    
    if (timeZoneString != nil) {
        NSTimeZone* timeZone = [NSTimeZone timeZoneWithName:timeZoneString];
-       if ([startDate isEqualToDate:endDate]) {
-           return @{
-                    @"date_time":[startDate RFC3339StringAtTimeZone:timeZone]
-                    };
-       }
-       else {
-           return  @{
-                     @"time_interval": @{
-                             @"start_date_time": [startDate RFC3339StringAtTimeZone:timeZone],
-                             @"end_date_time": [endDate RFC3339StringAtTimeZone:timeZone]
-                             }
-                     };
-       }
-   }
-   
-   if ([startDate isEqualToDate:endDate]) {
-       return @{
-                @"date_time":[startDate RFC3339String]
-                };
-   }
-   else {
+//       if ([startDate isEqualToDate:endDate]) {
+//           @{
+//               @"time_interval": @{
+//                     @"start_date_time": [startDate RFC3339StringAtTimeZone:timeZone],
+//                     @"end_date_time": [endDate RFC3339StringAtTimeZone:timeZone]
+//               }
+//            };
+////           return @{
+////                    @"date_time":[startDate RFC3339StringAtTimeZone:timeZone]
+////                    };
+//       }
+//       else {
        return  @{
                  @"time_interval": @{
-                         @"start_date_time": [startDate RFC3339String],
-                         @"end_date_time": [endDate RFC3339String]
+                         @"start_date_time": [startDate RFC3339StringAtTimeZone:timeZone],
+                         @"end_date_time": [endDate RFC3339StringAtTimeZone:timeZone]
                          }
                  };
+//       }
    }
+    
+    return  @{
+              @"time_interval": @{
+                      @"start_date_time": [startDate RFC3339String],
+                      @"end_date_time": [endDate RFC3339String]
+                      }
+              };
+   
+//   if ([startDate isEqualToDate:endDate]) {
+//       return @{
+//                @"date_time":[startDate RFC3339String]
+//                };
+//   }
+//   else {
+//       return  @{
+//                 @"time_interval": @{
+//                         @"start_date_time": [startDate RFC3339String],
+//                         @"end_date_time": [endDate RFC3339String]
+//                         }
+//                 };
+//   }
 }
 
 + (NSDictionary*) serializeMetadataArray:(NSDictionary*)metadata {
@@ -847,7 +860,7 @@ This serializer is used for all quantity types that are not supported by Open mH
    BOOL canSerialize = YES;
    @try{
        HKCategorySample *categorySample = (HKCategorySample*) sample;
-       NSArray* categoryTypes = [[RCTAppleHealthKitConstantMapper allSupportedCategoryTypeIdentifiersToClasses] allKeys];
+       NSArray* categoryTypes = [[OMHHealthKitConstantsMapper allSupportedCategoryTypeIdentifiersToClasses] allKeys];
        if(![categoryTypes containsObject:categorySample.categoryType.description]){
            if (error) {
                NSString* errorMessage = @"The category type is not currently supported.";
@@ -890,13 +903,13 @@ This serializer is used for all quantity types that are not supported by Open mH
 - (NSString*)getCategoryValueForTypeWithValue: (HKCategoryType*) categoryType categoryValue:(NSInteger)categoryValue {
    
    if ( [categoryType.description isEqualToString:HKCategoryTypeIdentifierAppleStandHour.description] ) {
-       return [RCTAppleHealthKitConstantMapper stringForHKAppleStandHourValue:(int)categoryValue];
+       return [OMHHealthKitConstantsMapper stringForHKAppleStandHourValue:(int)categoryValue];
    }
    else if ([categoryType.description isEqualToString:HKCategoryTypeIdentifierSleepAnalysis.description]) {
-       return [RCTAppleHealthKitConstantMapper stringForHKSleepAnalysisValue:(int)categoryValue];
+       return [OMHHealthKitConstantsMapper stringForHKSleepAnalysisValue:(int)categoryValue];
    }
    else if ([categoryType.description isEqualToString:HKCategoryTypeIdentifierCervicalMucusQuality.description]) {
-       return [RCTAppleHealthKitConstantMapper stringForHKCervicalMucusQualityValue:(int)categoryValue];
+       return [OMHHealthKitConstantsMapper stringForHKCervicalMucusQualityValue:(int)categoryValue];
    }
    else if ([categoryType.description isEqualToString:HKCategoryTypeIdentifierIntermenstrualBleeding]) {
        /*  Samples of this type represent the presence of intermenstrual bleeding and as such does not have a categorical value. HealthKit
@@ -905,10 +918,10 @@ This serializer is used for all quantity types that are not supported by Open mH
        return @"Intermenstrual bleeding";
    }
    else if ([categoryType.description isEqualToString:HKCategoryTypeIdentifierMenstrualFlow]) {
-       return [RCTAppleHealthKitConstantMapper stringForHKMenstrualFlowValue:(int)categoryValue];
+       return [OMHHealthKitConstantsMapper stringForHKMenstrualFlowValue:(int)categoryValue];
    }
    else if ([categoryType.description isEqualToString:HKCategoryTypeIdentifierOvulationTestResult]) {
-       return [RCTAppleHealthKitConstantMapper stringForHKOvulationTestResultValue:(int)categoryValue];
+       return [OMHHealthKitConstantsMapper stringForHKOvulationTestResultValue:(int)categoryValue];
    }
    else if ([categoryType.description isEqualToString:HKCategoryTypeIdentifierSexualActivity]) {
        /*  Samples of this type represent times during which sexual activity occurred. This means that during the time frame of each
@@ -1066,25 +1079,123 @@ This serializer is used for all quantity types that are not supported by Open mH
    NSMutableDictionary *fullSerializedDictionary = [NSMutableDictionary new];
    if(workoutSample.totalDistance){
        NSString *unitString = [OMHSerializer parseUnitFromQuantity:workoutSample.totalDistance];
-       [fullSerializedDictionary setObject:@{@"value":[NSNumber numberWithDouble:[workoutSample.totalDistance doubleValueForUnit:[HKUnit unitFromString:unitString]]],@"unit":unitString} forKey:@"distance"];
+       [fullSerializedDictionary setObject:@{@"value":[NSNumber numberWithDouble:[workoutSample.totalDistance doubleValueForUnit:[HKUnit unitFromString:unitString]]],@"unit":unitString} forKey:@"totalDistance"];
    }
    if(workoutSample.totalEnergyBurned){
-       [fullSerializedDictionary setObject:@{@"value":[NSNumber numberWithDouble:[workoutSample.totalEnergyBurned doubleValueForUnit:[HKUnit unitFromString:@"kcal"]]],@"unit":@"kcal"} forKey:@"kcal_burned"];
+       [fullSerializedDictionary setObject:@{@"value":[NSNumber numberWithDouble:[workoutSample.totalEnergyBurned doubleValueForUnit:[HKUnit unitFromString:@"kcal"]]],@"unit":@"kcal"} forKey:@"totalEnergyBurned"];
    }
-   if(workoutSample.duration){
+    
+   if(workoutSample.duration >= 0){
        [fullSerializedDictionary setObject:@{@"value":[NSNumber numberWithDouble:workoutSample.duration],@"unit":@"sec"} forKey:@"duration"];
    }
-   
+    
+    NSNumber *isTracked = @YES; // or [NSNumber numberWithBool:YES] the old way
+    if ([[workoutSample metadata][HKMetadataKeyWasUserEntered] intValue] == 1) {
+        isTracked = @NO;
+    }
+
+    NSString* device = @"";
+    if (@available(iOS 11.0, *)) {
+        device = [[workoutSample sourceRevision] productType];
+    } else {
+        device = [[workoutSample device] name];
+        if (!device) {
+            device = @"iPhone";
+        }
+    }
+    
+    if (@available(iOS 10.0, *)) {
+        if (workoutSample.totalSwimmingStrokeCount) {
+            NSString *unitString = [OMHSerializer parseUnitFromQuantity:workoutSample.totalSwimmingStrokeCount];
+            [fullSerializedDictionary setObject:@{@"value":[NSNumber numberWithDouble:[workoutSample.totalSwimmingStrokeCount doubleValueForUnit:[HKUnit unitFromString:unitString]]],@"unit":unitString} forKey:@"totalSwimmingStrokeCount"];
+            
+        }
+    }
+    
+    if (@available(iOS 11.0, *)) {
+        if (workoutSample.totalFlightsClimbed) {
+                NSString *unitString = [OMHSerializer parseUnitFromQuantity:workoutSample.totalFlightsClimbed];
+                [fullSerializedDictionary setObject:@{@"value":[NSNumber numberWithDouble:[workoutSample.totalFlightsClimbed doubleValueForUnit:[HKUnit unitFromString:unitString]]],@"unit":unitString} forKey:@"totalFlightsClimbed"];
+        }
+    }
+    
+    if (workoutSample.workoutEvents) {
+        NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+        for (HKWorkoutEvent *event in workoutSample.workoutEvents) {
+            NSDictionary *elem = nil;
+            if (@available(iOS 11.0, *)) {
+                elem = @{
+                    @"date" : event.date,
+                    @"dateInterval" : event.dateInterval,
+                    @"HKWorkoutEventType": [NSNumber numberWithInt:event.type],
+                    @"metadata": event.metadata,
+                };
+            } else {
+                elem = @{
+                    @"date" : event.date,
+                    @"dateInterval" : @(0),
+                    @"HKWorkoutEventType": [NSNumber numberWithInt:event.type],
+                    @"metadata": @{},
+                };
+            }
+            [data addObject:elem];
+        }
+        [fullSerializedDictionary setObject:data forKey:@"workoutEvents"];
+    }
+    
+
    [fullSerializedDictionary addEntriesFromDictionary:@{
                                                         @"effective_time_frame":[self populateTimeFrameProperty:workoutSample.startDate endDate:workoutSample.endDate],
-                                                        @"activity_name":[RCTAppleHealthKitConstantMapper stringForHKWorkoutActivityType:workoutSample.workoutActivityType]
-                                                        
+                                                        @"activity_name":[OMHHealthKitConstantsMapper stringForHKWorkoutActivityType:workoutSample.workoutActivityType],
+                                                        @"activityId" : [NSNumber numberWithInt:[workoutSample workoutActivityType]],
+                                                        @"isTracked": isTracked,
+                                                        @"device": device,
                                                         }];
    return fullSerializedDictionary;
 }
 
 - (NSString*)schemaName {
    return @"hk-workout";
+}
+- (NSString*)schemaVersion {
+   return @"1.0";
+}
+- (NSString*)schemaNamespace{
+   return @"granola";
+}
+@end
+
+/**
+This serializer maps data from HKWorkoutRoute samples to JSON that conforms to the generic, Granola-specific
+This serializer is used for all quantity types that are not supported by Open mHealth curated schemas. The [supportedTypeIdentifiersWithOMHSchema]([OMHSerializer supportedTypeIdentifiersWithOMHSchema]) method provides a list of schemas that _are_ supported by Open mHealth curated schemas.
+*/
+@interface OMHSerializerGenericWorkoutRoute : OMHSerializer; @end
+@implementation OMHSerializerGenericWorkoutRoute
+
++ (BOOL)canSerialize:(HKSample *)sample error:(NSError *__autoreleasing *)error {
+   if([sample isKindOfClass:[HKWorkoutRoute class]]){
+       return YES;
+   }
+   else{
+       if (error) {
+           NSString* errorMessage =
+           @"OMHSerializerGenericWorkout is used for HKWorkoutRoute samples only";
+           NSDictionary* userInfo = @{ NSLocalizedDescriptionKey : errorMessage };
+           *error = [NSError errorWithDomain: OMHErrorDomain
+                                        code: OMHErrorCodeIncorrectType
+                                    userInfo: userInfo];
+       }
+       return NO;
+   }
+}
+
+- (id)bodyData {
+   NSMutableDictionary *fullSerializedDictionary = [NSMutableDictionary new];
+   return fullSerializedDictionary;
+}
+
+- (NSString*)schemaName {
+   return @"hk-workout-route";
 }
 - (NSString*)schemaVersion {
    return @"1.0";

@@ -36,6 +36,8 @@
  */
 + (NSArray*)supportedTypeIdentifiers;
 
++ (NSString*)parseUnitFromQuantity:(HKQuantity*)quantity
+
 /**
  Serializes HealthKit samples into Open mHealth compliant JSON data points.
  @param sample The HealthKit sample to be serialized.
@@ -43,5 +45,6 @@
  @return A formatted JSON string containing the sample's data in a format that adheres to the appropriate Open mHealth schema.
  */
 - (NSString*)jsonForSample:(HKSample*)sample error:(NSError**)error;
+
 
 @end

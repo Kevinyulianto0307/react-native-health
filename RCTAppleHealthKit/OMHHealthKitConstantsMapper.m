@@ -137,6 +137,8 @@
             return @"HKWorkoutActivityTypeYoga";
         case HKWorkoutActivityTypeOther:
             return @"HKWorkoutActivityTypeOther";
+        case HKWorkoutRoute:
+            return @"HKWorkoutRoute";
         default:{
             NSException *e = [NSException
                               exceptionWithName:@"HKWorkoutActivityTypeInvalidValue"

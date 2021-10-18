@@ -197,6 +197,8 @@
         return [HKObjectType workoutType];
     } else if ([@"Workout" isEqualToString: key]) {
         return [HKObjectType workoutType];
+    }  else if ([@"WorkoutRoute" isEqualToString:key]) {
+        return [HKSeriesType workoutRouteType];
     }
 
     // Lab and tests
@@ -227,6 +229,7 @@
     } else if ([@"VitalSignRecord" isEqualToString:key]) {
         return [RCTAppleHealthKit clinicalTypeFromName:@"VitalSignRecord"];
     }
+
 
     return nil;
 }
@@ -365,6 +368,10 @@
     if ([@"Workout" isEqualToString:key]) {
         return [HKObjectType workoutType];
     }
+    
+    if ([@"WorkoutRoute" isEqualToString:key]) {
+       return [HKSeriesType workoutRouteType];
+   }
 
     // Lab and tests
     if ([@"BloodAlcoholContent" isEqualToString: key]) {

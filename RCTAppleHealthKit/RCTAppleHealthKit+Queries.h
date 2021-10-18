@@ -104,23 +104,22 @@
 
 /*@yulianto.kevin add workout route*/
 
-- (void)fetchAnchoredWorkoutRoutes:(HKWorkout *)workout
-                       completion:(void (^)(NSDictionary *, NSError *))completion;
-
-- (void)fetchAnchoredMultipleWorkoutRoutes:(HKSampleType *)type
+- (void)fetchAllWorkoutLocations:(HKSampleType *)type
                     predicate:(NSPredicate *)predicate
                        anchor:(HKQueryAnchor *)anchor
                         limit:(NSUInteger)lim
-                   completion:(void (^)(NSDictionary *, NSError *))completion;
+                      completion:(void (^)(NSDictionary *, NSError *))completion;
 
-- (void)fetchWorkoutRouteLocations: (HKWorkoutRoute *)route
-                        completion:(void (^)(NSDictionary *, NSError *))completion;
+- (void)fetchWorkoutRouteHealthStore: (HKWorkout *)workout
+                          completion:(void (^)(NSArray<CLLocation> *, NSError *))completion;
 
-- (void)fetchWorkouts: (HKSampleType *)type
-                predicate:(NSPredicate *)predicate
-                   anchor:(HKQueryAnchor *)anchor
-                    limit:(NSUInteger)lim
-                completion:(void (^)(NSDictionary *, NSError *))completion;
+
+- (void)fetchWorkoutsHealthStore: (HKSampleType *)type
+                                predicate:(NSPredicate *)predicate
+                                   anchor:(HKQueryAnchor *)anchor
+                                    limit:(NSUInteger)lim
+                                completion:(void (^)(NSArray<HKWorkout *> *workouts, NSError *error)completion);
+
 
 /*@yulianto.kevin end*/
 @end

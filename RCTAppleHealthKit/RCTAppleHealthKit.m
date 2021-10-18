@@ -510,29 +510,10 @@ RCT_EXPORT_METHOD(getClinicalRecords:(NSDictionary *)input callback:(RCTResponse
 }
 
 /*@yulianto.kevin: adding anchored workouts routes*/
-RCT_EXPORT_METHOD(getMultiWorkoutRoutes:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(getWorkoutLocations:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self _initializeHealthStore];
-    [self workout_getMultipleWorkoutRoutes:input callback:callback];
-}
-
-//RCT_EXPORT_METHOD(getWorkoutRouteLocations:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-//{
-//    [self _initializeHealthStore];
-//    [self workoutRoute_getLocations:input callback:callback];
-//}
-
-
-RCT_EXPORT_METHOD(getSingleWorkoutRoutes:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self _initializeHealthStore];
-    [self workout_getWorkoutRoutes:input callback:callback];
-}
-
-RCT_EXPORT_METHOD(getWorkouts:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
-{
-    [self _initializeHealthStore];
-    [self workout_getWorkouts:input callback:callback];
+    [self workout_loadAllWorkoutLocations:input callback:callback];
 }
 /*@yulianto.kevin end*/
 
