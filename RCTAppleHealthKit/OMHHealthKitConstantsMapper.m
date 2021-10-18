@@ -16,7 +16,7 @@
 
 #import <Foundation/Foundation.h>
 #import <HealthKit/HealthKit.h>
-#import "RCTAppleHealthKitConstantMapper.h"
+#import "OMHHealthKitConstantsMapper.h"
 
 @implementation OMHHealthKitConstantsMapper
 + (NSString*)stringForHKWorkoutActivityType:(int) enumValue{
@@ -137,8 +137,6 @@
             return @"HKWorkoutActivityTypeYoga";
         case HKWorkoutActivityTypeOther:
             return @"HKWorkoutActivityTypeOther";
-        case HKWorkoutRoute:
-            return @"HKWorkoutRoute";
         default:{
             NSException *e = [NSException
                               exceptionWithName:@"HKWorkoutActivityTypeInvalidValue"

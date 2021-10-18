@@ -36,7 +36,7 @@
  */
 + (NSArray*)supportedTypeIdentifiers;
 
-+ (NSString*)parseUnitFromQuantity:(HKQuantity*)quantity
++ (NSString*)parseUnitFromQuantity:(HKQuantity*)quantity;
 
 /**
  Serializes HealthKit samples into Open mHealth compliant JSON data points.

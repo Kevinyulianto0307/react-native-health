@@ -41,6 +41,5 @@
 + (HKWorkout *) hkWorkoutFromOptions: (NSDictionary *)options;
 + (HKWorkoutRoute *) hkWorkoutRouteFromOptions: (NSDictionary *)options API_AVAILABLE(ios(11));
 
-+ (NSDictionary *) serializeWorkoutRouteLocations:(HKWorkout *)workoutSample locations:NSArray<CLLocation *>locations
-
++ (NSDictionary *) serializeWorkoutRouteLocations:(HKWorkout *)workoutSample locations:(NSArray<CLLocation *>*)locations;
 @end

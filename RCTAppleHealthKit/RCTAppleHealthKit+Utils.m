@@ -9,7 +9,7 @@
 #import "RCTAppleHealthKit+Utils.h"
 #import "RCTAppleHealthKit+TypesAndPermissions.h"
 #import "OMHSerializer.h"
-#import "<CoreLocation/CoreLocation.h">
+#import "CoreLocation/CoreLocation.h"
 
 @implementation RCTAppleHealthKit (Utils)
 
