@@ -1159,7 +1159,9 @@
                     return;
                 }
                 
-                completion(@{@"data": [RCTAppleHealthKit serializeWorkoutRouteLocations:workout locations:locations] }, error);
+                if (tally == [workouts count]) {
+                    completion(@{@"data": [RCTAppleHealthKit serializeWorkoutRouteLocations:workout locations:locations] }, error);
+                }
             }];
         }
     }];

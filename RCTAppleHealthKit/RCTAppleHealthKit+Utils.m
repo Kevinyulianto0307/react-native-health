@@ -712,7 +712,7 @@
         @"device": device,
         @"locations": locationData,
         @"metadata":metadata,
-           @"sourceName" : [[[workoutSample sourceRevision] source] name],
+        @"sourceName" : [[[workoutSample sourceRevision] source] name],
         @"sourceId" : [[[workoutSample sourceRevision] source] bundleIdentifier],
     }];
     
